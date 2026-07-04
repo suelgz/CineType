@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg: #0D0F1A;
+  --surface: #151825;
+  --elevated: #1E2235;
+  --border: #2A2F45;
+  --violet: #A78BFA;
+  --violet-dim: #7C3AED;
+  --rose: #F472B6;
+  --amber: #FBBF24;
+  --green: #6EE7B7;
+  --text-primary: #F1F0ED;
+  --text-muted: #8B8FA8;
+  --text-dim: #5A5F7A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: 'DM Serif Display', serif;
+}
+
+.font-ui {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Grain texture overlay for personality cards */
+.grain-overlay {
+  position: relative;
+}
+.grain-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Poster shimmer loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.poster-skeleton {
+  background: linear-gradient(90deg, #1E2235 25%, #2A2F45 50%, #1E2235 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Glow pulse on match badge */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--violet); }
+  50% { box-shadow: 0 0 20px var(--violet), 0 0 40px rgba(167, 139, 250, 0.3); }
+}
+
+.match-badge-glow {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Progress bar fill */
+.progress-fill {
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Quiz card slide animation */
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(32px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-32px); }
+}
+
+.quiz-card-enter {
+  animation: slide-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Stagger reveal */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fade-up 0.5s ease forwards;
+}
+
+.fade-up-1 { animation-delay: 0.1s; opacity: 0; }
+.fade-up-2 { animation-delay: 0.25s; opacity: 0; }
+.fade-up-3 { animation-delay: 0.4s; opacity: 0; }
+.fade-up-4 { animation-delay: 0.55s; opacity: 0; }
+.fade-up-5 { animation-delay: 0.7s; opacity: 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* Selection */
+::selection { background: rgba(167, 139, 250, 0.3); color: var(--text-primary); }

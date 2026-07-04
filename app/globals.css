@@ -2,25 +2,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Warm cinema-dark — not pure black, not blue-black */
-  --bg: #15130F;
-  --surface: #1E1B16;
-  --elevated: #292420;
-  --border: #38322B;
-  --border-soft: #2A251F;
+  /* Warm, lived-in dark — cozy movie-night, not a wake */
+  --bg: #1B1814;
+  --surface: #26221C;
+  --elevated: #322C24;
+  --border: #423A2F;
+  --border-soft: #322B23;
 
-  /* Muted film-grade accents — desaturated, no neon/tech saturation */
-  --coral: #C1755A;
-  --coral-dim: #8F5942;
-  --teal: #6C9089;
-  --gold: #B99B5B;
-  --plum: #8B7098;
+  /* Muted but warmer accents — still no neon, but with some life in them */
+  --coral: #D98564;
+  --coral-dim: #A8664A;
+  --teal: #7DA79D;
+  --gold: #D4AD68;
+  --plum: #A186AE;
 
-  --text-primary: #EDE6D9;
-  --text-muted: #9C9284;
-  --text-dim: #6B6255;
+  --text-primary: #F3ECDF;
+  --text-muted: #ABA095;
+  --text-dim: #79705F;
 
-  --ink: #15130F;
+  --ink: #1B1814;
 }
 
 * {

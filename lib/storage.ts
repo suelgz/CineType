@@ -110,3 +110,25 @@ export function loadDisliked(): number[] {
     return [];
   }
 }
+
+export type MediaPreference = "movie" | "tv" | "both";
+
+const MEDIA_PREF_KEY = "cinetype_media_pref";
+
+export function saveMediaPreference(pref: MediaPreference): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(MEDIA_PREF_KEY, pref);
+  } catch (e) {}
+}
+
+export function loadMediaPreference(): MediaPreference {
+  if (typeof window === "undefined") return "both";
+  try {
+    const data = localStorage.getItem(MEDIA_PREF_KEY);
+    if (data === "movie" || data === "tv" || data === "both") return data;
+    return "both";
+  } catch (e) {
+    return "both";
+  }
+}

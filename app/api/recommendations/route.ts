@@ -74,34 +74,41 @@ function tagsToGenreIds(tags: string[]): { movie: number[]; tv: number[] } {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { tags, personalityId } = body as {
+    const { tags, personalityId, mediaPreference } = body as {
       tags: string[];
       personalityId: string;
+      mediaPreference?: "movie" | "tv" | "both";
     };
 
+    const pref = mediaPreference || "both";
     const apiKey = getApiKey();
 
     if (!apiKey) {
-      // Return mock data with media_type attached
-      const mockWithType = MOCK_MOVIES.map((m) => ({
+      // Return mock data with media_type attached, filtered by preference
+      let mockWithType = MOCK_MOVIES.map((m) => ({
         ...m,
-        media_type: m.title ? "movie" : "tv",
+        media_type: (m.title ? "movie" : "tv") as "movie" | "tv",
       }));
+      if (pref !== "both") {
+        mockWithType = mockWithType.filter((m) => m.media_type === pref);
+      }
       return NextResponse.json({ results: mockWithType, source: "mock" });
     }
 
     const genreMapping = tagsToGenreIds(tags);
-    const topTags = tags.slice(0, 4);
+
+    const wantMovies = pref === "movie" || pref === "both";
+    const wantTv = pref === "tv" || pref === "both";
 
     const [movieResults, tvResults] = await Promise.all([
-      discoverByGenres(genreMapping.movie, "movie"),
-      discoverByGenres(genreMapping.tv, "tv"),
+      wantMovies ? discoverByGenres(genreMapping.movie, "movie") : Promise.resolve([]),
+      wantTv ? discoverByGenres(genreMapping.tv, "tv") : Promise.resolve([]),
     ]);
 
     // Interleave movies and TV shows, deduplicate by id
     const seen = new Set<number>();
     const combined: TMDbMovie[] = [];
-    const maxEach = 8;
+    const maxEach = pref === "both" ? 8 : 16;
 
     for (let i = 0; i < maxEach; i++) {
       if (movieResults[i] && !seen.has(movieResults[i].id)) {

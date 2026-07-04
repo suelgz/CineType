@@ -5,6 +5,7 @@ import Link from "next/link";
 import { WatchPersonality } from "@/lib/types";
 import { loadProfile } from "@/lib/storage";
 import { ArrowRight, Share2, RefreshCw } from "lucide-react";
+import CoffeeLink from "@/components/CoffeeLink";
 
 interface Props {
   personality: WatchPersonality;
@@ -50,14 +51,17 @@ export default function ResultClient({ personality }: Props) {
         <Link href="/" className="font-display text-xl tracking-tight" style={{ color: "var(--text-primary)" }}>
           Cine<span style={{ color: "var(--coral)" }}>Type</span>
         </Link>
-        <Link
-          href="/quiz"
-          className="flex items-center gap-1.5 text-sm font-ui px-4 py-2 rounded-full border transition-opacity hover:opacity-70"
-          style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-        >
-          <RefreshCw size={13} />
-          Retake
-        </Link>
+        <div className="flex items-center gap-2">
+          <CoffeeLink variant="nav" />
+          <Link
+            href="/quiz"
+            className="flex items-center gap-1.5 text-sm font-ui px-4 py-2 rounded-full border transition-opacity hover:opacity-70"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+          >
+            <RefreshCw size={13} />
+            Retake
+          </Link>
+        </div>
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 md:px-10 py-14 md:py-20 pb-24">
@@ -217,7 +221,7 @@ export default function ResultClient({ personality }: Props) {
             style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}
           >
             <p className="text-sm mb-3" style={{ color: "var(--text-muted)" }}>
-              Is this actually you? Take the quiz to find your real type.
+              Is this actually you, or did you just click a link your friend sent? Take the real quiz.
             </p>
             <Link
               href="/quiz"

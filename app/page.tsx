@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PERSONALITIES } from "@/lib/personalities";
 import RevealSection from "@/components/RevealSection";
+import CoffeeLink from "@/components/CoffeeLink";
 
 export default function LandingPage() {
   const featured = PERSONALITIES.slice(0, 5);
@@ -36,6 +37,7 @@ export default function LandingPage() {
             >
               Credits
             </Link>
+            <CoffeeLink variant="nav" />
             <Link
               href="/quiz"
               className="press text-sm font-ui px-4 py-2 rounded-full"
@@ -55,7 +57,7 @@ export default function LandingPage() {
               className="text-xs font-ui uppercase tracking-[0.2em] mb-6"
               style={{ color: "var(--text-dim)" }}
             >
-              A watch-personality field guide — issue no. 12
+              A watch-personality diagnosis, delivered kindly
             </p>
             <h1
               className="font-display text-[2.75rem] leading-[1.05] sm:text-6xl md:text-[5.2rem] md:leading-[0.98] mb-2"
@@ -79,9 +81,10 @@ export default function LandingPage() {
               className="text-base md:text-lg leading-relaxed mb-8"
               style={{ color: "var(--text-muted)" }}
             >
-              Ten honest questions about how you watch stories — not what
-              genres you tick on a form. On the other side: one of twelve
-              Watch Personalities, and a shelf of picks that actually fit.
+              Ten slightly nosy questions about how you watch things — not
+              what genres you'd claim at a dinner party. On the other side:
+              one of twelve Watch Personalities, and a shelf of picks that
+              actually fit, no percentages pretending to be science.
             </p>
             <div className="flex flex-col gap-3">
               <Link
@@ -137,7 +140,7 @@ export default function LandingPage() {
               className="font-display text-2xl md:text-3xl italic reveal"
               style={{ color: "var(--text-primary)" }}
             >
-              Three honest steps to your next obsession.
+              Three steps. Minimal shame.
             </p>
           </div>
           <div className="md:col-span-8 md:pl-10 md:border-l" style={{ borderColor: "var(--border-soft)" }}>
@@ -145,18 +148,18 @@ export default function LandingPage() {
               {[
                 {
                   mark: "One",
-                  title: "Answer honestly, not aspirationally",
-                  desc: "Ten questions about how you actually experience stories — the shows you rewatch at 1am, the villains you defend, the endings that wreck you. Not what you think a well-read person would pick.",
+                  title: "Pick your battlefield",
+                  desc: "Movies, series, or both — tell us where you actually live, not where you pretend you live for your Letterboxd bio.",
                 },
                 {
                   mark: "Two",
-                  title: "Meet your Watch Personality",
-                  desc: "You'll land on one of twelve archetypes, written with enough detail that you'll want to send it to the one friend who'll immediately agree.",
+                  title: "Answer honestly, not aspirationally",
+                  desc: "Ten questions about how you really watch things — the villains you defend, the finale you're still mad about. Not what a well-read person would pick.",
                 },
                 {
                   mark: "Three",
-                  title: "Get picks with a reason attached",
-                  desc: "Every recommendation tells you why it fits — and who should skip it. No mystery percentage, just an honest note.",
+                  title: "Meet your Watch Personality",
+                  desc: "One of twelve archetypes, written with enough accuracy that you'll screenshot it before you've finished reading it.",
                 },
               ].map((item) => (
                 <div key={item.mark} className="reveal flex gap-6">
@@ -291,8 +294,8 @@ export default function LandingPage() {
               className="text-base md:text-lg mb-10"
               style={{ color: "var(--text-muted)" }}
             >
-              Takes about three minutes. No account required. Your result is
-              yours to keep, or send to whoever needs to see it.
+              Takes about three minutes. No account, no email, no fine print.
+              We just want to know what's wrong with you, watch-wise.
             </p>
             <Link
               href="/quiz"
@@ -329,9 +332,7 @@ export default function LandingPage() {
               Take the test
             </Link>
           </div>
-          <span style={{ color: "var(--text-dim)" }}>
-            Built for people who watch too much.
-          </span>
+          <CoffeeLink variant="full" />
         </div>
       </footer>
     </main>

@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { UserProfile, RecommendationCard as CardType, TMDbMovie } from "@/lib/types";
-import { loadProfile, loadDisliked, loadSeen } from "@/lib/storage";
+import { loadProfile, loadDisliked, loadSeen, loadMediaPreference } from "@/lib/storage";
 import { buildRecommendationCard } from "@/lib/recommendations";
 import RecommendationCardComponent from "./RecommendationCard";
+import CoffeeLink from "@/components/CoffeeLink";
 import { RefreshCw, Loader2 } from "lucide-react";
 
 export default function RecommendationsClient() {
@@ -25,7 +26,11 @@ export default function RecommendationsClient() {
       const res = await fetch("/api/recommendations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tags, personalityId: userProfile.personality.id }),
+        body: JSON.stringify({
+          tags,
+          personalityId: userProfile.personality.id,
+          mediaPreference: loadMediaPreference(),
+        }),
       });
 
       if (!res.ok) throw new Error("API error");
@@ -287,12 +292,12 @@ export default function RecommendationsClient() {
         {!loading && visibleCards.length > 0 && (
           <div className="mt-20 rounded-2xl p-8 md:p-10 text-center" style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}>
             <p className="font-display text-xl mb-2" style={{ color: "var(--text-primary)" }}>
-              Not what you expected?
+              Nothing hitting? Bold of you to have standards.
             </p>
             <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
-              Retake the test, or see all the personality types.
+              Retake the test, or go stare at your result again for validation.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center">
               <Link
                 href="/quiz"
                 className="press inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-ui text-sm border"
@@ -309,6 +314,7 @@ export default function RecommendationsClient() {
                   Back to my result
                 </Link>
               )}
+              <CoffeeLink variant="full" />
             </div>
           </div>
         )}

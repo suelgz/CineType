@@ -25,31 +25,26 @@ export default function WatchlistClient() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <nav className="sticky top-0 z-10 border-b" style={{
-        background: "rgba(13,15,26,0.92)",
-        backdropFilter: "blur(12px)",
-        borderColor: "var(--border)",
-      }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <nav
+        className="sticky top-0 z-10 border-b"
+        style={{ background: "rgba(21,19,15,0.92)", backdropFilter: "blur(12px)", borderColor: "var(--border-soft)" }}
+      >
+        <div className="max-w-5xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
           <Link href="/" className="font-display text-xl" style={{ color: "var(--text-primary)" }}>
-            Cine<span style={{ color: "var(--violet)" }}>Type</span>
+            Cine<span style={{ color: "var(--coral)" }}>Type</span>
           </Link>
-          <Link
-            href="/recommendations"
-            className="flex items-center gap-1.5 text-sm font-ui"
-            style={{ color: "var(--text-muted)" }}
-          >
+          <Link href="/recommendations" className="flex items-center gap-1.5 text-sm font-ui" style={{ color: "var(--text-muted)" }}>
             <ArrowLeft size={14} /> Back to picks
           </Link>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <p className="text-xs font-ui uppercase tracking-widest mb-3" style={{ color: "var(--text-dim)" }}>
+      <div className="max-w-5xl mx-auto px-6 md:px-10 py-12 md:py-16">
+        <div className="mb-12">
+          <p className="text-xs font-ui uppercase tracking-[0.2em] mb-4" style={{ color: "var(--text-dim)" }}>
             Your list
           </p>
-          <h1 className="font-display text-4xl mb-3" style={{ color: "var(--text-primary)" }}>
+          <h1 className="font-display text-4xl md:text-5xl mb-3" style={{ color: "var(--text-primary)" }}>
             Watchlist
           </h1>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
@@ -60,21 +55,17 @@ export default function WatchlistClient() {
         </div>
 
         {loaded && items.length === 0 && (
-          <div
-            className="rounded-2xl p-16 border text-center"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-          >
-            <div className="text-5xl mb-5">📋</div>
-            <h2 className="font-display text-2xl mb-3" style={{ color: "var(--text-primary)" }}>
-              Nothing saved yet
-            </h2>
-            <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
-              Hit the bookmark icon on any recommendation card to save it here.
+          <div className="rounded-2xl p-16 text-center" style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}>
+            <p className="font-display italic text-xl mb-4" style={{ color: "var(--coral)" }}>
+              Nothing saved yet.
+            </p>
+            <p className="text-sm mb-8 max-w-sm mx-auto" style={{ color: "var(--text-muted)" }}>
+              Hit the bookmark icon on any recommendation to keep it here for later.
             </p>
             <Link
               href="/recommendations"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-ui text-sm"
-              style={{ background: "var(--violet)", color: "#0D0F1A" }}
+              className="press inline-flex items-center gap-2 px-5 py-3 rounded-full font-ui text-sm"
+              style={{ background: "var(--coral)", color: "var(--ink)" }}
             >
               Browse recommendations
             </Link>
@@ -86,55 +77,46 @@ export default function WatchlistClient() {
             {items.map((item) => (
               <div
                 key={item.tmdbId}
-                className="group relative rounded-2xl overflow-hidden border card-hover"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                className="group relative rounded-2xl overflow-hidden card-hover"
+                style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}
               >
-                {/* Poster */}
-                <div className="relative aspect-[2/3] bg-[var(--elevated)]">
+                <div className="relative aspect-[2/3] overflow-hidden" style={{ background: "var(--elevated)" }}>
                   {item.posterPath ? (
-                    <Image
-                      src={`${TMDB_IMG}${item.posterPath}`}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                    />
+                    <div className="poster-drift w-full h-full relative">
+                      <Image
+                        src={`${TMDB_IMG}${item.posterPath}`}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                      />
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Film size={28} style={{ color: "var(--text-dim)" }} />
                     </div>
                   )}
 
-                  {/* Remove button — shows on hover */}
                   <button
                     onClick={() => handleRemove(item.tmdbId)}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: "rgba(0,0,0,0.7)", color: "white" }}
+                    className="press absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    style={{ background: "rgba(21,19,15,0.8)", color: "var(--text-primary)" }}
                     title="Remove from watchlist"
                   >
                     <X size={13} />
                   </button>
 
-                  {/* Type badge */}
                   <div
-                    className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-ui"
-                    style={{
-                      background: "rgba(13,15,26,0.85)",
-                      color: "var(--text-muted)",
-                      backdropFilter: "blur(4px)",
-                    }}
+                    className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-ui"
+                    style={{ background: "rgba(21,19,15,0.8)", color: "var(--text-muted)", backdropFilter: "blur(4px)" }}
                   >
                     {item.mediaType === "tv" ? <Tv size={10} /> : <Film size={10} />}
                     {item.mediaType === "tv" ? "Series" : "Film"}
                   </div>
                 </div>
 
-                {/* Title */}
                 <div className="p-3">
-                  <p
-                    className="text-sm font-ui leading-snug line-clamp-2"
-                    style={{ color: "var(--text-primary)" }}
-                  >
+                  <p className="text-sm font-ui leading-snug line-clamp-2" style={{ color: "var(--text-primary)" }}>
                     {item.title}
                   </p>
                 </div>
@@ -143,16 +125,12 @@ export default function WatchlistClient() {
           </div>
         )}
 
-        {/* Footer actions */}
         {loaded && items.length > 0 && (
-          <div className="mt-10 flex flex-col sm:flex-row gap-3">
+          <div className="mt-12 flex flex-col sm:flex-row gap-3">
             <Link
               href="/recommendations"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-ui text-sm border"
-              style={{
-                borderColor: "var(--border)",
-                color: "var(--text-muted)",
-              }}
+              className="press inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-ui text-sm border"
+              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
             >
               Back to recommendations
             </Link>
@@ -163,11 +141,8 @@ export default function WatchlistClient() {
                   setItems([]);
                 }
               }}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-ui text-sm border"
-              style={{
-                borderColor: "rgba(239,68,68,0.3)",
-                color: "rgba(239,68,68,0.7)",
-              }}
+              className="press inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-ui text-sm border"
+              style={{ borderColor: "rgba(193,90,90,0.3)", color: "rgba(214,140,140,0.8)" }}
             >
               Clear watchlist
             </button>

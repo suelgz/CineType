@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { UserProfile, RecommendationCard as CardType, TMDbMovie } from "@/lib/types";
-import { loadProfile } from "@/lib/storage";
+import { loadProfile, loadDisliked, loadSeen } from "@/lib/storage";
 import { buildRecommendationCard } from "@/lib/recommendations";
 import RecommendationCardComponent from "./RecommendationCard";
-import { ArrowLeft, RefreshCw, Loader2 } from "lucide-react";
-import { loadDisliked, loadSeen } from "@/lib/storage";
+import { RefreshCw, Loader2 } from "lucide-react";
 
 export default function RecommendationsClient() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -21,17 +20,12 @@ export default function RecommendationsClient() {
     setLoading(true);
     setError(null);
     try {
-      const tags = Object.keys(userProfile.tagWeights).filter(
-        (t) => userProfile.tagWeights[t] > 0
-      );
+      const tags = Object.keys(userProfile.tagWeights).filter((t) => userProfile.tagWeights[t] > 0);
 
       const res = await fetch("/api/recommendations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tags,
-          personalityId: userProfile.personality.id,
-        }),
+        body: JSON.stringify({ tags, personalityId: userProfile.personality.id }),
       });
 
       if (!res.ok) throw new Error("API error");
@@ -44,13 +38,11 @@ export default function RecommendationsClient() {
 
       const results: CardType[] = (data.results as TMDbMovie[])
         .filter((item) => !seen.has(item.id) && !disliked.has(item.id))
-        .map((item) =>
-          buildRecommendationCard(item, userProfile.personality, userProfile.tagWeights)
-        )
+        .map((item) => buildRecommendationCard(item, userProfile.personality, userProfile.tagWeights))
         .sort((a, b) => b.matchScore - a.matchScore);
 
       setCards(results);
-    } catch (e) {
+    } catch {
       setError("Couldn't load recommendations. Try refreshing.");
     } finally {
       setLoading(false);
@@ -73,28 +65,39 @@ export default function RecommendationsClient() {
 
   const visibleCards = cards.filter((c) => !hiddenIds.has(c.tmdbId));
 
+  // Organize into curated bands instead of one uniform grid.
+  const { tonight, slow, mixed } = useMemo(() => {
+    const tonightPicks = visibleCards.filter((c) => c.matchScore >= 85).slice(0, 3);
+    const usedIds = new Set(tonightPicks.map((c) => c.tmdbId));
+    const remaining = visibleCards.filter((c) => !usedIds.has(c.tmdbId));
+
+    const slowOnes = remaining.filter((c) =>
+      c.moodTags.some((t) => ["drama", "prestige", "mystery"].includes(t))
+    );
+    const slowIds = new Set(slowOnes.map((c) => c.tmdbId));
+    const rest = remaining.filter((c) => !slowIds.has(c.tmdbId));
+
+    return { tonight: tonightPicks, slow: slowOnes, mixed: rest };
+  }, [visibleCards]);
+
   if (!profile && !loading) {
     return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center px-6 text-center"
-        style={{ background: "var(--bg)" }}
-      >
-        <div className="text-5xl mb-6">🎬</div>
-        <h1
-          className="font-display text-3xl mb-4"
-          style={{ color: "var(--text-primary)" }}
-        >
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: "var(--bg)" }}>
+        <p className="font-display italic text-2xl mb-4" style={{ color: "var(--coral)" }}>
           No profile found
+        </p>
+        <h1 className="font-display text-3xl mb-4" style={{ color: "var(--text-primary)" }}>
+          We don't know your type yet
         </h1>
         <p className="text-base mb-8 max-w-md" style={{ color: "var(--text-muted)" }}>
-          Take the Watch Personality test first to get personalized recommendations.
+          Take the Watch Personality test first, and picks that actually fit will show up here.
         </p>
         <Link
           href="/quiz"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-ui font-medium text-sm"
-          style={{ background: "var(--violet)", color: "#0D0F1A" }}
+          className="press inline-flex items-center gap-2 px-6 py-3 rounded-full font-ui font-medium text-sm"
+          style={{ background: "var(--coral)", color: "var(--ink)" }}
         >
-          Take the Test
+          Take the test
         </Link>
       </div>
     );
@@ -104,42 +107,20 @@ export default function RecommendationsClient() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      {/* Background glow */}
-      {p && (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-          <div
-            className="absolute top-0 right-0 w-[600px] h-[400px] opacity-10 blur-3xl"
-            style={{
-              background: `radial-gradient(ellipse, ${p.color}, transparent)`,
-            }}
-          />
-        </div>
-      )}
-
-      {/* Nav */}
-      <nav className="relative z-10 sticky top-0 border-b" style={{
-        background: "rgba(13,15,26,0.9)",
-        backdropFilter: "blur(12px)",
-        borderColor: "var(--border)"
-      }}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="font-display text-xl tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Cine<span style={{ color: "var(--violet)" }}>Type</span>
+      <nav
+        className="sticky top-0 z-10 border-b"
+        style={{ background: "rgba(21,19,15,0.92)", backdropFilter: "blur(12px)", borderColor: "var(--border-soft)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+          <Link href="/" className="font-display text-xl tracking-tight" style={{ color: "var(--text-primary)" }}>
+            Cine<span style={{ color: "var(--coral)" }}>Type</span>
           </Link>
 
           {p && (
             <Link
               href={`/result/${p.id}`}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-ui border"
-              style={{
-                background: `${p.color}18`,
-                borderColor: `${p.color}44`,
-                color: p.color,
-              }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-ui border"
+              style={{ background: `${p.color}18`, borderColor: `${p.color}44`, color: p.color }}
             >
               <span>{p.emoji}</span>
               <span className="hidden sm:inline">{p.name}</span>
@@ -149,16 +130,15 @@ export default function RecommendationsClient() {
           <div className="flex items-center gap-2">
             <Link
               href="/watchlist"
-              className="flex items-center gap-1.5 text-sm font-ui px-4 py-2 rounded-xl border transition-opacity hover:opacity-70"
+              className="press flex items-center gap-1.5 text-sm font-ui px-4 py-2 rounded-full border"
               style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
             >
               <span className="hidden sm:inline">Watchlist</span>
-              <span className="sm:hidden">📋</span>
             </Link>
             <button
               onClick={() => profile && fetchRecommendations(profile)}
               disabled={loading}
-              className="flex items-center gap-1.5 text-sm font-ui px-4 py-2 rounded-xl border transition-opacity hover:opacity-70 disabled:opacity-40"
+              className="press flex items-center gap-1.5 text-sm font-ui px-4 py-2 rounded-full border disabled:opacity-40"
               style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
             >
               {loading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
@@ -168,26 +148,21 @@ export default function RecommendationsClient() {
         </div>
       </nav>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
-        {/* Header */}
-        <div className="mb-12">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 py-12 md:py-16">
+        <div className="mb-14 md:mb-20">
           {p ? (
             <>
-              <p
-                className="text-xs font-ui uppercase tracking-widest mb-3"
-                style={{ color: "var(--text-dim)" }}
-              >
-                Picked for {p.name}
+              <p className="text-xs font-ui uppercase tracking-[0.2em] mb-4" style={{ color: "var(--text-dim)" }}>
+                Curated for {p.name}
               </p>
-              <h1
-                className="font-display text-4xl md:text-5xl mb-4"
-                style={{ color: "var(--text-primary)" }}
-              >
-                Your picks
+              <h1 className="font-display text-4xl md:text-6xl mb-5 leading-tight" style={{ color: "var(--text-primary)" }}>
+                Something you might
+                <br />
+                enjoy today.
               </h1>
               <p className="text-base max-w-xl" style={{ color: "var(--text-muted)" }}>
-                Every card below explains why it fits you — and who should skip it.
-                Hit "Not interested" to never see it again.
+                Each pick comes with an honest reason it's here — and a note on who
+                should skip it. Not sure why some of these fit. They just do.
               </p>
             </>
           ) : (
@@ -198,36 +173,23 @@ export default function RecommendationsClient() {
           )}
         </div>
 
-        {/* Data source notice */}
         {!loading && dataSource === "mock" && (
           <div
-            className="mb-8 rounded-2xl px-5 py-4 border text-sm flex items-start gap-3"
-            style={{
-              background: "rgba(251,191,36,0.08)",
-              borderColor: "rgba(251,191,36,0.25)",
-              color: "var(--text-muted)",
-            }}
+            className="mb-10 rounded-2xl px-5 py-4 border text-sm"
+            style={{ background: "var(--surface)", borderColor: "var(--border-soft)", color: "var(--text-muted)" }}
           >
-            <span className="text-base">💡</span>
-            <span>
-              Showing curated picks. Add a{" "}
-              <code className="px-1 py-0.5 rounded text-xs" style={{ background: "var(--elevated)", color: "var(--amber)" }}>
-                TMDB_API_KEY
-              </code>{" "}
-              environment variable to unlock live TMDb recommendations.
-            </span>
+            Showing curated picks. Add a{" "}
+            <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "var(--elevated)", color: "var(--gold)" }}>
+              TMDB_API_KEY
+            </code>{" "}
+            environment variable to unlock live TMDb recommendations.
           </div>
         )}
 
-        {/* Loading skeleton */}
         {loading && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-2xl overflow-hidden border"
-                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-              >
+              <div key={i} className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}>
                 <div className="aspect-[2/3] poster-skeleton" />
                 <div className="p-5 space-y-3">
                   <div className="h-4 rounded w-3/4 poster-skeleton" />
@@ -240,18 +202,14 @@ export default function RecommendationsClient() {
           </div>
         )}
 
-        {/* Error */}
         {error && !loading && (
-          <div
-            className="rounded-2xl p-8 border text-center"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-          >
+          <div className="rounded-2xl p-8 text-center" style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}>
             <p className="text-base mb-4" style={{ color: "var(--text-muted)" }}>
               {error}
             </p>
             <button
               onClick={() => profile && fetchRecommendations(profile)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-ui text-sm"
+              className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-ui text-sm"
               style={{ background: "var(--elevated)", color: "var(--text-primary)" }}
             >
               <RefreshCw size={14} /> Try again
@@ -259,30 +217,54 @@ export default function RecommendationsClient() {
           </div>
         )}
 
-        {/* Cards grid */}
         {!loading && !error && visibleCards.length > 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visibleCards.map((card, i) => (
-              <div
-                key={card.tmdbId}
-                className="fade-up"
-                style={{ animationDelay: `${Math.min(i * 0.08, 0.5)}s`, opacity: 0 }}
-              >
-                <RecommendationCardComponent
-                  card={card}
-                  personalityColor={p?.color ?? "#A78BFA"}
-                  personalityAccent={p?.accentColor ?? "#F472B6"}
-                  onHide={handleHide}
-                />
-              </div>
-            ))}
+          <div className="space-y-16 md:space-y-20">
+            {tonight.length > 0 && (
+              <Band title="Tonight's picks" subtitle="The ones that feel right for right now.">
+                {tonight.map((card) => (
+                  <RecommendationCardComponent
+                    key={card.tmdbId}
+                    card={card}
+                    personalityColor={p?.color ?? "#C1755A"}
+                    personalityAccent={p?.accentColor ?? "#B99B5B"}
+                    onHide={handleHide}
+                  />
+                ))}
+              </Band>
+            )}
+
+            {slow.length > 0 && (
+              <Band title="If you want something slower" subtitle="Patient stories, for when you're not in a rush.">
+                {slow.map((card) => (
+                  <RecommendationCardComponent
+                    key={card.tmdbId}
+                    card={card}
+                    personalityColor={p?.color ?? "#C1755A"}
+                    personalityAccent={p?.accentColor ?? "#B99B5B"}
+                    onHide={handleHide}
+                  />
+                ))}
+              </Band>
+            )}
+
+            {mixed.length > 0 && (
+              <Band title="Everything else that fits" subtitle="Not sure why, but these felt right too.">
+                {mixed.map((card) => (
+                  <RecommendationCardComponent
+                    key={card.tmdbId}
+                    card={card}
+                    personalityColor={p?.color ?? "#C1755A"}
+                    personalityAccent={p?.accentColor ?? "#B99B5B"}
+                    onHide={handleHide}
+                  />
+                ))}
+              </Band>
+            )}
           </div>
         )}
 
-        {/* Empty state */}
         {!loading && !error && visibleCards.length === 0 && cards.length > 0 && (
           <div className="text-center py-20">
-            <div className="text-4xl mb-4">🎬</div>
             <h2 className="font-display text-2xl mb-3" style={{ color: "var(--text-primary)" }}>
               You've gone through everything
             </h2>
@@ -294,30 +276,26 @@ export default function RecommendationsClient() {
                 setHiddenIds(new Set());
                 profile && fetchRecommendations(profile);
               }}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-ui font-medium text-sm"
-              style={{ background: "var(--violet)", color: "#0D0F1A" }}
+              className="press inline-flex items-center gap-2 px-5 py-3 rounded-full font-ui font-medium text-sm"
+              style={{ background: "var(--coral)", color: "var(--ink)" }}
             >
               <RefreshCw size={14} /> Load more picks
             </button>
           </div>
         )}
 
-        {/* Bottom CTA */}
         {!loading && visibleCards.length > 0 && (
-          <div
-            className="mt-16 rounded-2xl p-8 border text-center"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-          >
+          <div className="mt-20 rounded-2xl p-8 md:p-10 text-center" style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}>
             <p className="font-display text-xl mb-2" style={{ color: "var(--text-primary)" }}>
               Not what you expected?
             </p>
             <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
-              Retake the test or see all personality types.
+              Retake the test, or see all the personality types.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/quiz"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-ui text-sm border"
+                className="press inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-ui text-sm border"
                 style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
               >
                 Retake the test
@@ -325,7 +303,7 @@ export default function RecommendationsClient() {
               {p && (
                 <Link
                   href={`/result/${p.id}`}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-ui text-sm"
+                  className="press inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-ui text-sm"
                   style={{ background: "var(--elevated)", color: "var(--text-primary)" }}
                 >
                   Back to my result
@@ -336,5 +314,23 @@ export default function RecommendationsClient() {
         )}
       </div>
     </div>
+  );
+}
+
+function Band({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
+        <div>
+          <h2 className="font-display text-2xl md:text-3xl mb-1.5" style={{ color: "var(--text-primary)" }}>
+            {title}
+          </h2>
+          <p className="text-sm" style={{ color: "var(--text-dim)" }}>
+            {subtitle}
+          </p>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{children}</div>
+    </section>
   );
 }

@@ -18,7 +18,7 @@ export default function QuizClient() {
 
   const currentQuestion = QUIZ_QUESTIONS[currentIndex];
   const total = QUIZ_QUESTIONS.length;
-  const progress = ((currentIndex) / total) * 100;
+  const progress = (currentIndex / total) * 100;
 
   const handleSelect = useCallback(
     (option: QuizOption) => {
@@ -49,9 +49,8 @@ export default function QuizClient() {
         setCurrentIndex((prev) => prev + 1);
         setSelectedOption(null);
         setIsAnimating(false);
-      }, 280);
+      }, 380);
     } else {
-      // Quiz complete
       setIsComplete(true);
       const { personality, tagWeights } = determinePersonality(newAnswers);
       const profile = {
@@ -63,7 +62,7 @@ export default function QuizClient() {
       saveProfile(profile);
       setTimeout(() => {
         router.push(`/result/${personality.id}`);
-      }, 600);
+      }, 900);
     }
   }, [selectedOption, isAnimating, currentQuestion, answers, currentIndex, total, router]);
 
@@ -75,23 +74,16 @@ export default function QuizClient() {
   }, [currentIndex, isAnimating]);
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "var(--bg)" }}
-    >
-      {/* Top progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-1" style={{ background: "var(--surface)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
+      {/* Top progress — a thin warm line, not a violet gradient */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-[3px]" style={{ background: "var(--surface)" }}>
         <div
           className="h-full progress-fill"
-          style={{
-            width: `${progress}%`,
-            background: "linear-gradient(90deg, var(--violet-dim), var(--violet))",
-          }}
+          style={{ width: `${progress}%`, background: "var(--coral)" }}
         />
       </div>
 
-      {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-2xl mx-auto w-full">
+      <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-6 max-w-2xl mx-auto w-full">
         <button
           onClick={currentIndex > 0 ? handleBack : () => router.push("/")}
           className="flex items-center gap-2 text-sm font-ui transition-opacity hover:opacity-70"
@@ -100,55 +92,45 @@ export default function QuizClient() {
           <ArrowLeft size={16} />
           {currentIndex === 0 ? "Back" : "Previous"}
         </button>
-        <span
-          className="font-display text-base"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Cine<span style={{ color: "var(--violet)" }}>Type</span>
+        <span className="font-display text-base" style={{ color: "var(--text-primary)" }}>
+          Cine<span style={{ color: "var(--coral)" }}>Type</span>
         </span>
-        <span
-          className="text-sm font-ui"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {currentIndex + 1}/{total}
+        <span className="text-sm font-ui" style={{ color: "var(--text-dim)" }}>
+          {String(currentIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
         </span>
       </nav>
 
-      {/* Quiz area */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-2xl">
           {isComplete ? (
             <div className="text-center fade-up">
-              <div className="text-4xl mb-6">🎬</div>
-              <h2
-                className="font-display text-2xl mb-3"
-                style={{ color: "var(--text-primary)" }}
+              <p
+                className="font-display italic text-3xl mb-3"
+                style={{ color: "var(--coral)" }}
               >
-                Calculating your type…
-              </h2>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                This'll just take a second.
+                Reading between the lines&hellip;
+              </p>
+              <p className="text-sm font-ui" style={{ color: "var(--text-muted)" }}>
+                Putting a name to it.
               </p>
             </div>
           ) : (
             <div key={currentIndex} className="quiz-card-enter">
-              {/* Question */}
-              <div className="mb-10 text-center">
+              <div className="mb-10">
                 <p
-                  className="text-xs font-ui uppercase tracking-widest mb-4"
+                  className="text-xs font-ui uppercase tracking-[0.2em] mb-4"
                   style={{ color: "var(--text-dim)" }}
                 >
-                  Question {currentIndex + 1}
+                  Question {String(currentIndex + 1).padStart(2, "0")}
                 </p>
                 <h1
-                  className="font-display text-2xl md:text-3xl leading-snug"
+                  className="font-display text-2xl md:text-4xl leading-snug"
                   style={{ color: "var(--text-primary)" }}
                 >
                   {currentQuestion.question}
                 </h1>
               </div>
 
-              {/* Options */}
               <div className="space-y-3">
                 {currentQuestion.options.map((option) => {
                   const isSelected = selectedOption === option.id;
@@ -156,48 +138,39 @@ export default function QuizClient() {
                     <button
                       key={option.id}
                       onClick={() => handleSelect(option)}
-                      className="w-full text-left rounded-2xl p-4 md:p-5 border transition-all duration-200 group"
+                      className="press w-full text-left rounded-2xl p-4 md:p-5 border"
                       style={{
-                        background: isSelected
-                          ? "rgba(167, 139, 250, 0.15)"
-                          : "var(--surface)",
-                        borderColor: isSelected
-                          ? "var(--violet)"
-                          : "var(--border)",
+                        background: isSelected ? "rgba(193, 117, 90, 0.12)" : "var(--surface)",
+                        borderColor: isSelected ? "var(--coral)" : "var(--border)",
                         color: isSelected ? "var(--text-primary)" : "var(--text-muted)",
                       }}
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all"
+                          className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all duration-300"
                           style={{
-                            borderColor: isSelected ? "var(--violet)" : "var(--border)",
-                            background: isSelected ? "var(--violet)" : "transparent",
+                            borderColor: isSelected ? "var(--coral)" : "var(--border)",
+                            background: isSelected ? "var(--coral)" : "transparent",
                           }}
                         >
-                          {isSelected && (
-                            <div className="w-2 h-2 rounded-full bg-white" />
-                          )}
+                          {isSelected && <div className="w-2 h-2 rounded-full" style={{ background: "var(--ink)" }} />}
                         </div>
-                        <span className="text-sm md:text-base leading-relaxed">
-                          {option.text}
-                        </span>
+                        <span className="text-sm md:text-base leading-relaxed">{option.text}</span>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Next button */}
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleNext}
                   disabled={!selectedOption}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-ui font-medium text-sm transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="press flex items-center gap-2 px-6 py-3 rounded-xl font-ui font-medium text-sm disabled:opacity-30 disabled:cursor-not-allowed"
                   style={{
-                    background: selectedOption ? "var(--violet)" : "var(--surface)",
-                    color: selectedOption ? "#0D0F1A" : "var(--text-dim)",
-                    borderColor: "var(--border)",
+                    background: selectedOption ? "var(--coral)" : "var(--surface)",
+                    color: selectedOption ? "var(--ink)" : "var(--text-dim)",
+                    border: selectedOption ? "none" : "1px solid var(--border)",
                   }}
                 >
                   {currentIndex === total - 1 ? "See my type" : "Next"}

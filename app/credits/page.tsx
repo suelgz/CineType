@@ -10,7 +10,7 @@ export default function CreditsPage() {
           className="font-display text-xl tracking-tight"
           style={{ color: "var(--text-primary)" }}
         >
-          Cine<span style={{ color: "var(--violet)" }}>Type</span>
+          Cine<span style={{ color: "var(--coral)" }}>Type</span>
         </Link>
         <Link
           href="/"
@@ -35,7 +35,7 @@ export default function CreditsPage() {
         {/* TMDb attribution - required */}
         <div
           className="rounded-2xl p-8 border mb-8"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          style={{ background: "var(--surface)", borderColor: "var(--border-soft)" }}
         >
           <div className="flex items-start gap-4 mb-6">
             <div
@@ -56,7 +56,7 @@ export default function CreditsPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-ui hover:opacity-80 transition-opacity"
-                style={{ color: "var(--violet)" }}
+                style={{ color: "var(--coral)" }}
               >
                 themoviedb.org ↗
               </a>
@@ -66,8 +66,8 @@ export default function CreditsPage() {
           <div
             className="rounded-xl p-4 mb-5 border"
             style={{
-              background: "rgba(167,139,250,0.06)",
-              borderColor: "rgba(167,139,250,0.2)",
+              background: "rgba(193,117,90,0.07)",
+              borderColor: "rgba(193,117,90,0.22)",
             }}
           >
             <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -89,7 +89,7 @@ export default function CreditsPage() {
         {/* About the product */}
         <div
           className="rounded-2xl p-8 border mb-8"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          style={{ background: "var(--surface)", borderColor: "var(--border-soft)" }}
         >
           <h2
             className="font-display text-xl mb-4"
@@ -120,7 +120,7 @@ export default function CreditsPage() {
         {/* Tech stack */}
         <div
           className="rounded-2xl p-8 border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          style={{ background: "var(--surface)", borderColor: "var(--border-soft)" }}
         >
           <h2
             className="font-display text-xl mb-4"
